@@ -21,7 +21,7 @@ Step 1:
 
 Step 2:
 
-	Below are the argument to run the script (refer: sample run command inside python script with value, you can modify as per your configuration)
+	Below are the argument to run the script (refer: sample run command is added inside python script with value, you can modify as per your configuration)
 		  --AMIId <AMIId>               Provide Latest AMI Id
 		  --KEYName <KEYName>           Provide OpenSSH Keypair Name
 		  --InstanceType <InstanceType> Provide Instance Type
