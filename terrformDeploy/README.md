@@ -29,22 +29,14 @@ Step 2:
 
 #Step to run the terraform
 Step 1:
-	
-	Run git clone <repo>
-
-Step 2:
-	
-	Go to directory
-
-Step 3:
 
 	Run terraform init
 
-Step 4:
+Step 2:
 
 	Run terraform apply
 		** check deployment configuration and give approval as yes
 
-Step 5:
+Step 3:
 	
 	Check output for public IP, connect to the VM using your public key and IP over SSH.
