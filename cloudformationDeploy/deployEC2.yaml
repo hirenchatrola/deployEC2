@@ -1,0 +1,110 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Deploy Ec2
+
+Parameters:
+  AMIId:
+    Type: String
+    Default: ami-08f63db601b82ff5f
+  KEYName:
+    Type: String
+    Default: connectVm
+  InstanceType:
+    Type: String
+    Default: t2.micro
+  CIDRRange:
+    Type: String
+    Default: 120.2.0.0/16
+  CIDRRangeSN:
+    Type: String
+    Default: 120.2.2.0/24
+  AZ:
+    Type: String
+    Default: ap-south-1a
+
+Resources:
+  deployVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref CIDRRange 
+      Tags:
+      - Key: Name
+        Value: testVPC
+  deployIGW:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+      - Key: Name
+        Value: testInternetGateway
+  attachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId:
+        Ref: deployVPC
+      InternetGatewayId:
+         Ref: deployIGW
+  deploySubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: deployVPC
+      CidrBlock: !Ref CIDRRangeSN 
+      AvailabilityZone: !Ref AZ
+      Tags:
+      - Key: Name
+        Value: testPublicSubnet 
+  deployRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:  
+        Ref: deployVPC
+      Tags:
+      - Key: Name
+        Value: testRouttable
+  deployRouteToIG:
+    Type: AWS::EC2::Route
+    DependsOn: deployIGW
+    Properties:
+       RouteTableId:
+         Ref: deployRouteTable
+       DestinationCidrBlock: 0.0.0.0/0
+       GatewayId:
+         Ref: deployIGW
+  deployRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: deploySubnet
+      RouteTableId:
+        Ref: deployRouteTable
+  deploySG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow ssh to client host
+      VpcId:
+         Ref: deployVPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0
+  deployInstance: 
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      ImageId: !Ref AMIId
+      KeyName: !Ref KEYName
+      NetworkInterfaces: 
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet: 
+            - Ref: "deploySG"
+          SubnetId: 
+            Ref: "deploySubnet"
+      Tags:
+        - Key: Name
+          Value: testInstance
